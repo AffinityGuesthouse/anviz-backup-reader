@@ -1,0 +1,9 @@
+{
+	"name": "anviz-backup-reader",
+	"description": "Reads Anviz's Fingerprint Reader BAK.KQ backup files.",
+	"keywords": ["anviz", "BAK.KQ", "EP300", "fingerprint"],
+	"version": "0.0.1",
+	"dependencies":	{
+		"int24": "^0.0.1"
+	}
+}
