@@ -2,10 +2,10 @@
 
 Reads Anviz's Fingerprint Reader BAK.KQ backup files.
 
-## Install
+#### Install
 
 `npm install anviz-backup-reader`
 
-## Comments
+#### Comments
 
 Not related to http://www.anviz.com/
