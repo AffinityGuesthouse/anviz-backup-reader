@@ -17,14 +17,7 @@ module.exports.readFileSync = function (filename) {
 	var result = []
 	for (i=0;i<n;i++) {
 		var OFFSET = 3+i*14
-		result.push({
-			unknown: [ buffer[OFFSET], buffer[OFFSET+1] ],
-			userId:  int24.readUInt24BE(buffer, OFFSET+2),
-			time:    new Date(BASEDATE.getTime()+buffer.readUInt32BE(OFFSET+5)*1000),
-			type:    buffer.readUInt8(OFFSET+9),
-			code:    buffer.readUInt8(OFFSET+10),
-			jobId:   int24.readUInt24BE(buffer, OFFSET+11)
-		})
+		result.push(_parseRow(buffer, OFFSET))
 	}
 	return result
 }
@@ -88,16 +81,30 @@ Stream.prototype._transform = function (chunk, encoding, done) {
     var n = parseInt(this._buffer.length/14)
     for (i=0;i<n;i++) {
         var OFFSET = i*14
-        var record = {
-            unknown: [ this._buffer[OFFSET], this._buffer[OFFSET+1] ],
-            userId:  int24.readUInt24BE(this._buffer, OFFSET+2),
-            time:    new Date(BASEDATE.getTime()+this._buffer.readUInt32BE(OFFSET+5)*1000),
-            type:    this._buffer.readUInt8(OFFSET+9),
-            code:    this._buffer.readUInt8(OFFSET+10),
-            jobId:   int24.readUInt24BE(this._buffer, OFFSET+11)
-        }
+        var record = _parseRow(this._buffer, OFFSET)
         this.push(record)
     }
 
     done()
+}
+
+function _parseRow (buffer, OFFSET) {
+    var row = {}
+    //row.unknown = [ buffer[OFFSET], buffer[OFFSET+1] ]
+    row.userId  = int24.readUInt24BE(buffer, OFFSET+2)
+    row.time    = new Date(BASEDATE.getTime()+buffer.readUInt32BE(OFFSET+5)*1000)
+
+    row.code    = buffer.readUInt8(OFFSET+10)
+    if      (row.code === 0) row.code = 'IN'
+    else if (row.code === 1) row.code = 'OUT'
+    else if (row.code === 2) row.code = 'BREAK'
+
+    row.type    = buffer.readUInt8(OFFSET+9)
+    if      (row.type === 1) row.type = 'FINGER 1'
+    else if (row.type === 2) row.type = 'FINGER 2'
+    else if (row.type === 4) row.type = 'PASSWORD'
+
+    row.jobId   = int24.readUInt24BE(buffer, OFFSET+11)
+
+    return row
 }
